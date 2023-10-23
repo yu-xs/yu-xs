@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <link rel="stylesheet" href="https://at.alicdn.com/t/c/font_4201069_6lj1a79mm14.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .box {
+            position: relative;
+            width: 400px;
+            height: 460px;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 10px auto;
+            background-color: aliceblue;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .box .song-name {
+            z-index: 100;
+            /* opacity: .6; */
+            width: 100%;
+            height: 30px;
+            margin: 0;
+            /* margin-bottom: 10px; */
+            font-size: 20px;
+            background-color: honeydew;
+            text-align: center;
+            line-height: 30px;
+            user-select: none;
+        }
+
+        .box img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 400px;
+            margin: 0 auto;
+            vertical-align: bottom;
+        }
+
+        .box .song {
+            position: absolute;
+            bottom: 0;
+            width: 400px;
+            padding: 5px;
+            box-sizing: border-box;
+            background-color: steelblue;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .box .song .collection {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            color: oldlace;
+            background-color: wheat;
+            font-size: 22px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 50px;
+        }
+
+        .box .song .collection:hover {
+            color: tomato;
+        }
+
+        .box .song button {
+            width: 50px;
+            height: 50px;
+            padding: 6px;
+            border: none;
+            border-radius: 50%;
+            color: oldlace;
+            font-weight: bold;
+            background-color: wheat;
+        }
+
+        .box .song audio {
+            width: 280px;
+            height: 50px;
+            vertical-align: bottom;
+        }
+
+        /* 收藏盒子样式 */
+        .collection-box {
+            width: 400px;
+            margin: 0 auto;
+            background-color: antiquewhite;
+        }
+
+        .collection-box ul {
+            padding: 10px;
+        }
+
+        .collection-box ul li {
+            height: 30px;
+            cursor: pointer;
+            line-height: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <p class="song-name">歌曲名字</p>
+
+        <img src="" alt="" />
+
+        <div class="song">
+            <i class="collection iconfont icon-aixin"></i>
+            <audio autoplay controls src=""></audio>
+            <button>点击随机</button>
+        </div>
+    </div>
+    <div class="collection-box">
+        <ul></ul>
+    </div>
+
+    <script>
+        var songName = document.querySelector(".box .song-name");
+        var img = document.querySelector(".box img");
+        var audio = document.querySelector(".box .song audio");
+        var button = document.querySelector(".box .song button");
+        var collection = document.querySelector(".box .song .collection");
+        var collectionUl = document.querySelector(".collection-box ul");
+        var collectionLis = document.querySelectorAll(".collection-box ul li");
+
+        var dataList;
+        var collectionArr = [];
+        // 收藏按钮
+        collection.onclick = function () {
+            var newLi = document.createElement("li");
+            newLi.innerText = dataList.name + "-" + dataList.artistsname;
+            collectionUl.appendChild(newLi);
+
+            collectionArr.push({
+                songName: dataList.name + "-" + dataList.artistsname,
+                picurl: dataList.picurl,
+                url: dataList.url
+            })
+            console.log(collectionArr);
+        }
+
+        // 点击收藏列表里的歌曲后渲染歌曲数据
+        collectionUl.addEventListener("click", function (e) {
+            audio.play();
+            var lis = collectionUl.children;
+            for (var i = 0; i < lis.length; i++) {
+                if (lis[i] === e.target) {
+                    console.log(i)
+                    songName.innerText = collectionArr[i].songName;
+                    img.src = collectionArr[i].picurl;
+                    audio.src = collectionArr[i].url;
+                }
+            }
+        })
+
+        // 点击随机切换
+        button.onclick = function () {
+            renderSong();
+        }
+
+        // 播放结束后自动切换
+        audio.addEventListener("ended", function () {
+            renderSong();
+        })
+
+        // 封装渲染歌曲数据
+        renderSong();
+        function renderSong() {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://api.qqsuu.cn/api/dm-randmusic?sort=热歌榜&format=json", true);
+
+            xhr.send();
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var data = JSON.parse(xhr.responseText);
+                    data = data.data;
+                    dataList = data;
+                    console.log(data);
+
+                    songName.innerText = data.name + "-" + data.artistsname;
+                    img.src = data.picurl;
+                    audio.src = data.url;
+
+                }
+            }
+        }
+    </script>
+</body>
+
+</html>
